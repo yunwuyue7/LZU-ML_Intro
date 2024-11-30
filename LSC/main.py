@@ -3,6 +3,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 def read_data(file_path):
     # 定义列名
@@ -12,40 +14,36 @@ def read_data(file_path):
     data = pd.read_csv(file_path, names=column_names)
     return data
 
-def plot_data(data):
+def plot_data(X_train, X_test, y_train, y_test, w_lsc, b_lsc, w_fld, b_fld):
     # 绘制散点图
     plt.figure(figsize=(10, 6))
     
-    # 分别绘制每种鸢尾花的数据
-    for species in data['class'].unique():
-        subset = data[data['class'] == species]
-        plt.scatter(subset['sepal_length'], subset['sepal_width'], label=species)
+    # 分别绘制训练集和测试集的数据
+    for species in [0, 1]:
+        subset_train = X_train[y_train == species]
+        subset_test = X_test[y_test == species]
+        plt.scatter(subset_train[:, 0], subset_train[:, 1], label=f'Train Class {species}', alpha=0.5)
+        plt.scatter(subset_test[:, 0], subset_test[:, 1], label=f'Test Class {species}', marker='x')
     
     # 添加标题和标签
-    plt.title('Sepal Length vs Sepal Width')
+    plt.title('Sepal Length vs Sepal Width (Train and Test Data)')
     plt.xlabel('Sepal Length (cm)')
     plt.ylabel('Sepal Width (cm)')
     plt.legend()
     
-    # 调用最小二乘分类器函数并绘制分类界线
-    w_lsc, b_lsc = least_squares_classifier(data)
-    x_values = np.array([data['sepal_length'].min(), data['sepal_length'].max()])
+    # 绘制 LSC 决策边界
+    x_values = np.array([X_train[:, 0].min(), X_train[:, 0].max()])
     y_values_lsc = (-w_lsc[0] * x_values - b_lsc) / w_lsc[1]
     plt.plot(x_values, y_values_lsc, color='red', linestyle='--', label='LSC Decision Boundary')
     
-    # 调用 Fisher 判别分析函数并绘制分类界线
-    w_fld, b_fld = fisher_linear_discriminant(data)
+    # 绘制 FLD 决策边界
     y_values_fld = (-w_fld[0] * x_values - b_fld) / w_fld[1]
     plt.plot(x_values, y_values_fld, color='blue', linestyle='-.', label='FLD Decision Boundary')
     
     plt.legend()
     plt.show()
 
-def least_squares_classifier(data):
-    # 提取特征矩阵 X 和标签向量 y
-    X = data[['sepal_length', 'sepal_width']].values
-    y = (data['class'] == data['class'].unique()[0]).astype(int)  # 将类别转换为 0 和 1
-    
+def least_squares_classifier(X, y):
     # 添加偏置项
     X = np.hstack((np.ones((X.shape[0], 1)), X))
     
@@ -55,11 +53,7 @@ def least_squares_classifier(data):
     # 返回权重向量 w 和偏置项 b
     return w[1:], w[0]
 
-def fisher_linear_discriminant(data):
-    # 提取特征矩阵 X 和标签向量 y
-    X = data[['sepal_length', 'sepal_width']].values
-    y = (data['class'] == data['class'].unique()[0]).astype(int)  # 将类别转换为 0 和 1
-    
+def fisher_linear_discriminant(X, y):
     # 分离两个类别的数据
     X1 = X[y == 1]
     X2 = X[y == 0]
@@ -81,9 +75,38 @@ def fisher_linear_discriminant(data):
     
     return w, b
 
+def evaluate_model(X_train, X_test, y_train, y_test, w, b):
+    # 预测测试集的标签
+    y_pred = (X_test @ w + b > 0).astype(int)
+    
+    # 计算准确率
+    accuracy = accuracy_score(y_test, y_pred)
+    
+    return accuracy
+
 if __name__ == "__main__":
     # 读取筛选后的数据
     filtered_data = read_data("iris/iris_filter.data")
     
+    # 提取特征矩阵 X 和标签向量 y
+    X = filtered_data[['sepal_length', 'sepal_width']].values
+    y = (filtered_data['class'] == filtered_data['class'].unique()[0]).astype(int)  # 将类别转换为 0 和 1
+    
+    # 划分训练集和测试集
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    # 训练 LSC 模型
+    w_lsc, b_lsc = least_squares_classifier(X_train, y_train)
+    
+    # 训练 FLD 模型
+    w_fld, b_fld = fisher_linear_discriminant(X_train, y_train)
+    
+    # 评估模型性能
+    lsc_accuracy = evaluate_model(X_train, X_test, y_train, y_test, w_lsc, b_lsc)
+    fld_accuracy = evaluate_model(X_train, X_test, y_train, y_test, w_fld, b_fld)
+    
+    print(f"LSC Accuracy: {lsc_accuracy:.2f}")
+    print(f"FLD Accuracy: {fld_accuracy:.2f}")
+    
     # 绘制数据
-    plot_data(filtered_data)
+    plot_data(X_train, X_test, y_train, y_test, w_lsc, b_lsc, w_fld, b_fld)

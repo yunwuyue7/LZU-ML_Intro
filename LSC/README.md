@@ -10,7 +10,7 @@ This repository demonstrates how to classify the Iris dataset using Least Square
 1. Clone the repository:
    ```powershell
    git clone https://github.com/yourusername/iris-classification.git
-   cd iris-classification
+   cd LSC
 
 2. Install the required dependencies：
    ```powershell
