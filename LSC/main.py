@@ -3,6 +3,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from filter import filter_data  # 导入 filter.py 中的 filter_data 函数
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
@@ -85,8 +86,15 @@ def evaluate_model(X_train, X_test, y_train, y_test, w, b):
     return accuracy
 
 if __name__ == "__main__":
+    # 定义文件路径
+    input_path = 'iris/iris.data'
+    filtered_path = 'iris/iris_filter.data'
+    
+    # 调用 filter_data 函数筛选数据并保存到新的文件
+    filter_data(input_path, filtered_path)
+    
     # 读取筛选后的数据
-    filtered_data = read_data("iris/iris_filter.data")
+    filtered_data = read_data(filtered_path)
     
     # 提取特征矩阵 X 和标签向量 y
     X = filtered_data[['sepal_length', 'sepal_width']].values
