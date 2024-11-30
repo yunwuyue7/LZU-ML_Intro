@@ -1,11 +1,10 @@
-# main.py
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from filter import filter_data  # 导入 filter.py 中的 filter_data 函数
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+
+from filter import filter_data  # 导入 filter.py 中的 filter_data 函数
 
 def read_data(file_path):
     # 定义列名
@@ -19,14 +18,14 @@ def plot_data(X_train, X_test, y_train, y_test, w_lsc, b_lsc, w_fld, b_fld):
     # 绘制散点图
     plt.figure(figsize=(10, 6))
     
-    # 分别绘制训练集和测试集的数据
+    # 分别绘制训练集与测试集
     for species in [0, 1]:
         subset_train = X_train[y_train == species]
         subset_test = X_test[y_test == species]
         plt.scatter(subset_train[:, 0], subset_train[:, 1], label=f'Train Class {species}', alpha=0.5)
         plt.scatter(subset_test[:, 0], subset_test[:, 1], label=f'Test Class {species}', marker='x')
     
-    # 添加标题和标签
+    # 添加标题、标签
     plt.title('Sepal Length vs Sepal Width (Train and Test Data)')
     plt.xlabel('Sepal Length (cm)')
     plt.ylabel('Sepal Width (cm)')
@@ -86,14 +85,15 @@ def evaluate_model(X_train, X_test, y_train, y_test, w, b):
     return accuracy
 
 if __name__ == "__main__":
-    # 定义文件路径
+    # 定义输入输出路径
     input_path = 'iris/iris.data'
     filtered_path = 'iris/iris_filter.data'
     
-    # 调用 filter_data 函数筛选数据并保存到新的文件
+    # 调用 filter_data 函数筛选数据并保存到新文件
     filter_data(input_path, filtered_path)
-    
-    # 读取筛选后的数据
+    print(f"筛选后的数据已保存到 {filtered_path}")
+
+    # 读取筛选的数据
     filtered_data = read_data(filtered_path)
     
     # 提取特征矩阵 X 和标签向量 y
@@ -116,5 +116,5 @@ if __name__ == "__main__":
     print(f"LSC Accuracy: {lsc_accuracy:.2f}")
     print(f"FLD Accuracy: {fld_accuracy:.2f}")
     
-    # 绘制数据
+    # matplolib绘图
     plot_data(X_train, X_test, y_train, y_test, w_lsc, b_lsc, w_fld, b_fld)
