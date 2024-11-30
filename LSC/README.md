@@ -27,6 +27,7 @@ This repository demonstrates how to classify the Iris dataset using Least Square
 - `main.py`: Reads the filtered data, performs classification using LSC and FLD, and plots the results.
 - `iris`: A folder containing the Iris dataset files.
 - `requirements.txt`: List of required Python packages.
+- `Assignment1.pdf`：The summary report for this assignment.
 - `README.md`: This file.
 
 ## Dependencies
